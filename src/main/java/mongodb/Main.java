@@ -3,8 +3,15 @@ package mongodb;
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoException;
-import com.mongodb.client.*;
-import com.mongodb.client.model.*;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.FindOneAndUpdateOptions;
+import com.mongodb.client.model.ReturnDocument;
+import com.mongodb.client.model.Updates;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.InsertManyResult;
 import org.bson.codecs.configuration.CodecRegistry;
@@ -17,11 +24,26 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static com.mongodb.client.model.Filters.*;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
 public class Main {
+  // a few pre-wired recipes we can insert into the database as examples.
+  public static List<Recipe> recipes = Arrays.asList(
+      new Recipe("elotes",
+              Arrays.asList("corn", "mayonnaise", "cotija cheese", "sour cream", "lime" ),
+              35),
+      new Recipe("loco moco",
+              Arrays.asList("ground beef", "butter", "onion", "egg", "bread bun", "mushrooms" ),
+              54),
+      new Recipe("patatas bravas",
+              Arrays.asList("potato", "tomato", "olive oil", "onion", "garlic", "paprika" ),
+              80),
+      new Recipe("fried rice",
+              Arrays.asList("rice", "soy sauce", "egg", "onion", "pea", "carrot", "sesame oil" ),
+              40)
+  );
+
   public static void main(String[] args) {
     Logger.getLogger( "org.mongodb.driver" ).setLevel(Level.WARNING);
     // TODO:
@@ -42,10 +64,18 @@ public class Main {
             fromProviders(PojoCodecProvider.builder().automatic(true).build()));
 
     // The MongoClient defines the connection to our MongoDB datastore instance (Atlas) using MongoClientSettings
+    // You can create a MongoClientSettings with a Builder to configure codecRegistries, connection strings, and more
     MongoClientSettings settings = MongoClientSettings.builder()
             .codecRegistry(pojoCodecRegistry)
             .applyConnectionString(mongoUri).build();
-    MongoClient mongoClient = MongoClients.create(settings);
+
+    MongoClient mongoClient;
+    try {
+       mongoClient = MongoClients.create(settings);
+    } catch (MongoException me) {
+      System.err.println("Unable to connect to the MongoDB instance due to an error: " + me);
+      return;
+    }
 
     // MongoDatabase defines a connection to a specific MongoDB database
     MongoDatabase database = mongoClient.getDatabase(dbName);
@@ -59,44 +89,49 @@ public class Main {
      * insert them all in one call with insertMany().
      */
 
-    List<Recipe> recipes = getRecipes();
-
     try {
+      // recipes is a static variable defined above
       InsertManyResult result = collection.insertMany(recipes);
-      System.out.println("Inserted document ids: " + result.getInsertedIds());
+      System.out.println("Inserted " + result.getInsertedIds().size() + " documents.");
     } catch (MongoException me) {
-      System.err.println("Unable to insert any driver documents due to an error: " + me);
+      System.err.println("Unable to insert any recipes into MongoDB due to an error: " + me);
+      return;
     }
 
     /*      *** FIND DOCUMENTS ***
      *
      * Now that we have data in Atlas, we can read it. To retrieve all of
-     * the data in a collection, we call find() with an empty filter.
+     * the data in a collection, we call find() with an empty filter. find()
+     * returns a cursor, which is a special kind of iterator that efficiently
+     * fetches documents in batches when they're requested. Here
+     * we use the try-with-resources pattern to automatically close the
+     * cursor once we finish reading the recipes.
      */
 
     try (MongoCursor<Recipe> cursor = collection.find().iterator()) {
       while (cursor.hasNext()) {
-        System.out.println(cursor.next());
+        Recipe currentRecipe = cursor.next();
+        System.out.println(String.format("%s has %d ingredients and takes %d minutes to make", currentRecipe.getName(), currentRecipe.getIngredients().size(), currentRecipe.getPrepTimeInMinutes()));
       }
     } catch (MongoException me) {
-      System.err.println("Could not find documents due to an error: " + me);
+      System.err.println("Unable to find any recipes in MongoDB due to an error: " + me);
     }
 
     // We can also find a single document. Let's find the first document
-    // that has the string "potato" in the Ingredients list. We
+    // that has the string "potato" in the ingredients list. We
     // use the Filters.eq() method to search for any values in any
     // ingredients list that match the string "potato":
 
-    Bson findPotato = eq("ingredients", "potato");
+    Bson findPotato = Filters.eq("ingredients", "potato");
     try {
       Recipe firstPotato = collection.find(findPotato).first();
       if (firstPotato == null) {
-        System.out.println("Didn't find any recipes containing 'potato' as an ingredient.");
-      } else {
-        System.out.println(firstPotato);
+        System.out.println("Couldn't find any recipes containing 'potato' as an ingredient in MongoDB.");
+        return;
       }
     } catch (MongoException me) {
-      System.err.println("Could not find single document due to an error: " + me);
+      System.err.println("Unable to find a recipe to update in MongoDB due to an error: " + me);
+      return;
     }
 
     /*      *** UPDATE A DOCUMENT ***
@@ -111,8 +146,7 @@ public class Main {
     // The following FindOneAndUpdateOptions specify that we want it to return
     // the *updated* document to us. By default, we get the document as it was *before*
     // the update.
-    FindOneAndUpdateOptions options = new FindOneAndUpdateOptions();
-    options.returnDocument(ReturnDocument.AFTER);
+    FindOneAndUpdateOptions options = new FindOneAndUpdateOptions().returnDocument(ReturnDocument.AFTER);
 
     // The updatedDocument object is a Recipe object that reflects the
     // changes we just made.
@@ -120,12 +154,12 @@ public class Main {
       Recipe updatedDocument = collection.findOneAndUpdate(findPotato,
               updateFilter, options);
       if (updatedDocument == null) {
-        System.out.println("Couldn't update the recipe.");
+        System.out.println("Couldn't update the recipe. Did someone (or something) delete it?");
       } else {
         System.out.println("Updated the recipe to: " + updatedDocument);
       }
     } catch (MongoException me) {
-      System.err.println("Could not update any recipes due to an error: " + me);
+      System.err.println("Unable to update any recipes due to an error: " + me);
     }
 
     /*      *** DELETE DOCUMENTS ***
@@ -140,36 +174,18 @@ public class Main {
     try {
       DeleteResult deleteResult = collection
               .deleteMany(deleteFilter);
-        System.out.println(String.format("Deleted %d documents.", deleteResult.getDeletedCount()));
+      System.out.println(String.format("Deleted %d documents.", deleteResult.getDeletedCount()));
     } catch (MongoException me) {
-      System.err.println("Could not delete any recipes due to an error: " + me);
+      System.err.println("Unable to delete any recipes due to an error: " + me);
     }
 
     // always close the connection when done working with the client
     mongoClient.close();
   }
 
-  // helper method with a few pre-wired recipes we can insert into the database as examples.
-  public static List<Recipe> getRecipes() {
-    return Arrays.asList(
-            new Recipe("elotes",
-                    Arrays.asList("corn", "mayonnaise", "cotija cheese", "sour cream", "lime" ),
-                    35),
-            new Recipe("loco moco",
-                    Arrays.asList("ground beef", "butter", "onion", "egg", "bread bun", "mushrooms" ),
-                    54),
-            new Recipe("patatas bravas",
-                    Arrays.asList("potato", "tomato", "olive oil", "onion", "garlic", "paprika" ),
-                    80),
-            new Recipe("fried rice",
-                    Arrays.asList("rice", "soy sauce", "egg", "onion", "pea", "carrot", "sesame oil" ),
-                    40)
-    );
-  }
-
   // POJO (Plain Old Java Object) class defining a recipe. This class is a POJO because it contains getters and
   // setters for every member variable as well as an empty constructor.
-  static public class Recipe {
+  public static class Recipe {
     private String name;
     private List<String> ingredients;
     private int prepTimeInMinutes;
@@ -183,7 +199,8 @@ public class Main {
     // empty constructor required when we fetch data from the database -- getters and setters are later used to
     // set values for member variables
     public Recipe() {
-      ingredients = new ArrayList<>();
+      ingredients = new ArrayList<String>();
+      name = "";
     }
 
     @Override

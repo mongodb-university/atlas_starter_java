@@ -7,12 +7,18 @@ application that connects to MongoDB Atlas.
 
 ## Prerequisites
 
-To build and run this project, you will need IntelliJ IDEA Community
+1) To build and run this project, you will need IntelliJ IDEA Community
 Edition for MacOS, Windows, or Linux. You can download it 
 [here](https://www.jetbrains.com/idea/).
 
+2) A working installation of the [Java 8 JDK](https://developers.redhat.com/products/openjdk/download).
+
+3) A working installation of the [Maven](https://maven.apache.org/) build system. (Your IntelliJ installation should include this)
+
 It is also helpful, but not necessary, to have a working installation of
 [Git](https://git-scm.com/downloads) version control.
+
+Some of these tools may come pre-installed in your programming environment.
 
 ## Getting Started
 
@@ -50,7 +56,7 @@ If you download this project as a ZIP archive,
 
 2. Right click on the directory named `src`.
 
-3. Select `Mark Directory as`.
+3. Select `Mark Directory as` from the context menu.
 
 4. Select `Sources Root`.
 
@@ -75,9 +81,9 @@ If you download this project as a ZIP archive,
 
 ### 5. Run the Project
 
-1. Right click `Main`
+1. Right click `Main`.
 
-2. Select `Run 'Main.main()'`
+2. Select `Run 'Main.main()'` from the context menu.
 
 Congratulations! You have just connected to MongoDB Atlas using the Java MongoDB Driver!
 Try modifying the code to experiment with the Driver and MongoDB!
@@ -91,14 +97,3 @@ Are you having trouble getting connected to your MongoDB Atlas instance? Double-
 2. Have you [whitelisted your current IP address](https://docs.atlas.mongodb.com/security-whitelist/) in the Atlas UI?
 
 3. Do you have a [working installation of Java](https://stackoverflow.com/questions/18888220/how-to-check-whether-java-is-installed-on-the-computer)?
-
-## Notes
-
-If you prefer to install your tools independently,
-see the list of the individual requirements below:
-
-### Required:
-1) A working installation of the [Java 8 JDK](https://developers.redhat.com/products/openjdk/download).
-2) A working installation of the [Maven](https://maven.apache.org/) build system.
-
-Some of these tools may come pre-installed in your programming environment.
