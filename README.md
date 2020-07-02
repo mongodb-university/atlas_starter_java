@@ -40,13 +40,13 @@ If you download this project as a ZIP archive,
 
 2. Navigate to the directory containing this project.
 
-3. Select the directory `java-atlas-example`.
+3. Select the directory `atlas_starter_java`.
 
 4. Click `OK`.
 
 ### 3. Configure Maven
 
-1. In IntelliJ, click to expand the `java-atlas-example` directory.
+1. In IntelliJ, click to expand the `atlas_starter_java` directory.
 
 2. Right click on the directory named `src`.
 
@@ -56,7 +56,7 @@ If you download this project as a ZIP archive,
 
 ### 4. Configure your Atlas Credentials
 
-1. Expand `java-atlas-example > src > main > java > mongodb > Main`.
+1. Expand `atlas_starter_java > src > main > java > mongodb > Main`.
 
 2. Double-click `Main`.
 
@@ -70,6 +70,8 @@ If you download this project as a ZIP archive,
     // you do not want to store your password in plain-text here.
     String mongoUri = "<Your Atlas Connection String>";
 ```
+
+4. Replace the `<password>` section of the Atlas connection URI you just pasted into `Main` with your password!
 
 ### 5. Run the Project
 
@@ -94,12 +96,7 @@ Are you having trouble getting connected to your MongoDB Atlas instance? Double-
 
 If you prefer to install your tools independently,
 see the list of the individual requirements below:
-    // TODO:
-    // Replace the placeholder connection string below with your
-    // Altas cluster specifics. Be sure it includes
-    // a valid username and password! Note that in a production environment,
-    // you do not want to store your password in plain-text here.
-    String mongoUri = "<Your Atlas Connection String>";
+
 ### Required:
 1) A working installation of the [Java 8 JDK](https://developers.redhat.com/products/openjdk/download).
 2) A working installation of the [Maven](https://maven.apache.org/) build system.
