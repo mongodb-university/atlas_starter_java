@@ -173,7 +173,7 @@ public class Main {
     try {
       DeleteResult deleteResult = collection
               .deleteMany(deleteFilter);
-      System.out.printf("Deleted %d documents.", deleteResult.getDeletedCount());
+      System.out.printf("Deleted %d documents.\n", deleteResult.getDeletedCount());
     } catch (MongoException me) {
       System.err.println("Unable to delete any recipes due to an error: " + me);
     }
