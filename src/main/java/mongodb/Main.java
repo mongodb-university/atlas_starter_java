@@ -69,12 +69,12 @@ public class Main {
             .codecRegistry(pojoCodecRegistry)
             .applyConnectionString(mongoUri).build();
 
-    MongoClient mongoClient;
+    MongoClient mongoClient = null;
     try {
        mongoClient = MongoClients.create(settings);
     } catch (MongoException me) {
       System.err.println("Unable to connect to the MongoDB instance due to an error: " + me);
-      return;
+      System.exit(1);
     }
 
     // MongoDatabase defines a connection to a specific MongoDB database
@@ -95,23 +95,22 @@ public class Main {
       System.out.println("Inserted " + result.getInsertedIds().size() + " documents.");
     } catch (MongoException me) {
       System.err.println("Unable to insert any recipes into MongoDB due to an error: " + me);
-      return;
+      System.exit(1);
     }
 
     /*      *** FIND DOCUMENTS ***
      *
      * Now that we have data in Atlas, we can read it. To retrieve all of
-     * the data in a collection, we call find() with an empty filter. find()
-     * returns a cursor, which is a special kind of iterator that efficiently
-     * fetches documents in batches when they're requested. Here
-     * we use the try-with-resources pattern to automatically close the
-     * cursor once we finish reading the recipes.
+     * the data in a collection, we call find() with an empty filter. We can
+     * retrieve an iterator to return the results from our call to the find()
+     * method. Here we use the try-with-resources pattern to automatically
+     * close the cursor once we finish reading the recipes.
      */
 
     try (MongoCursor<Recipe> cursor = collection.find().iterator()) {
       while (cursor.hasNext()) {
         Recipe currentRecipe = cursor.next();
-        System.out.println(String.format("%s has %d ingredients and takes %d minutes to make", currentRecipe.getName(), currentRecipe.getIngredients().size(), currentRecipe.getPrepTimeInMinutes()));
+        System.out.printf("%s has %d ingredients and takes %d minutes to make\n", currentRecipe.getName(), currentRecipe.getIngredients().size(), currentRecipe.getPrepTimeInMinutes());
       }
     } catch (MongoException me) {
       System.err.println("Unable to find any recipes in MongoDB due to an error: " + me);
@@ -127,11 +126,11 @@ public class Main {
       Recipe firstPotato = collection.find(findPotato).first();
       if (firstPotato == null) {
         System.out.println("Couldn't find any recipes containing 'potato' as an ingredient in MongoDB.");
-        return;
+        System.exit(1);
       }
     } catch (MongoException me) {
       System.err.println("Unable to find a recipe to update in MongoDB due to an error: " + me);
-      return;
+      System.exit(1);
     }
 
     /*      *** UPDATE A DOCUMENT ***
@@ -174,7 +173,7 @@ public class Main {
     try {
       DeleteResult deleteResult = collection
               .deleteMany(deleteFilter);
-      System.out.println(String.format("Deleted %d documents.", deleteResult.getDeletedCount()));
+      System.out.printf("Deleted %d documents.", deleteResult.getDeletedCount());
     } catch (MongoException me) {
       System.err.println("Unable to delete any recipes due to an error: " + me);
     }
