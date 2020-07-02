@@ -21,18 +21,11 @@
             <version>4.0.1</version>
         </dependency>
 
-        <!-- log4j logging dependency, required for logging output from the MongoDB Java Driver -->
+        <!-- slf4j logging dependency, required for logging output from the MongoDB Java Driver -->
         <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-            <version>2.9.0</version>
-        </dependency>
-
-        <!-- logback logging dependency, required for logging output from the Mongodb Java Driver -->
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.2.3</version>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-jdk14</artifactId>
+            <version>1.7.28</version>
         </dependency>
     </dependencies>
 

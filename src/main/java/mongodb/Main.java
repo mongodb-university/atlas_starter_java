@@ -14,6 +14,8 @@ import org.bson.conversions.Bson;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static com.mongodb.client.model.Filters.*;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
@@ -21,6 +23,7 @@ import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
 public class Main {
   public static void main(String[] args) {
+    Logger.getLogger( "org.mongodb.driver" ).setLevel(Level.WARNING);
     // TODO:
     // Replace the placeholder connection string below with your
     // Altas cluster specifics. Be sure it includes
