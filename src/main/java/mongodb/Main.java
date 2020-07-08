@@ -92,7 +92,7 @@ public class Main {
     try {
       // recipes is a static variable defined above
       InsertManyResult result = collection.insertMany(recipes);
-      System.out.println("Inserted " + result.getInsertedIds().size() + " documents.");
+      System.out.println("Inserted " + result.getInsertedIds().size() + " documents.\n");
     } catch (MongoException me) {
       System.err.println("Unable to insert any recipes into MongoDB due to an error: " + me);
       System.exit(1);
@@ -155,7 +155,7 @@ public class Main {
       if (updatedDocument == null) {
         System.out.println("Couldn't update the recipe. Did someone (or something) delete it?");
       } else {
-        System.out.println("Updated the recipe to: " + updatedDocument);
+        System.out.println("\nUpdated the recipe to: " + updatedDocument);
       }
     } catch (MongoException me) {
       System.err.println("Unable to update any recipes due to an error: " + me);
@@ -173,7 +173,7 @@ public class Main {
     try {
       DeleteResult deleteResult = collection
               .deleteMany(deleteFilter);
-      System.out.printf("Deleted %d documents.\n", deleteResult.getDeletedCount());
+      System.out.printf("\nDeleted %d documents.\n", deleteResult.getDeletedCount());
     } catch (MongoException me) {
       System.err.println("Unable to delete any recipes due to an error: " + me);
     }
