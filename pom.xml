@@ -18,7 +18,7 @@
         <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongodb-driver-sync</artifactId>
-            <version>4.0.1</version>
+            <version>4.0.6</version>
         </dependency>
 
         <!-- slf4j logging dependency, required for logging output from the MongoDB Java Driver -->
